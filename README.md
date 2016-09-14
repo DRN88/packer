@@ -21,6 +21,16 @@ packer build -force CentOS-7-x86_64-Minimal-1511-packer.json
 PACKER_LOG="yes" packer build -force CentOS-7-x86_64-Minimal-1511.json
 ```
 
+## Monitor virtualbox vm status using vrdp
+```
+# SSH Port forward
+ssh -L 5999:localhost:5999 my-build-server
+
+# Run RDP Session
+rdesktop localhost:5999
+```
+
+
 ## To install Virtualbox in VMWare infrastructure - WORKS
 1. Enable Nested Virtualization  
   * http://docs.openstack.org/developer/devstack/guides/devstack-with-nested-kvm.html
