@@ -1,0 +1,30 @@
+["modifyvm", "{{.Name}}", "--nic1", "natnetwork"],
+["modifyvm", "{{.Name}}", "--nat-network1", "NatNetwork1"]
+
+
+
+yum clean all
+yum -y localinstall "https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
+yum -y upgrade
+yum -y install cloud-init
+yum clean all
+
+
+
+"provisioners": [{
+  "type": "shell",
+  "script": "shell-provision.sh",
+  "pause_before": "10s"
+}],
+
+
+"provisioners": [{
+  "type": "shell",
+  "script": "shell-provision.sh"
+}],
+
+
+"boot_command" : [
+    "<tab><spacebar> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/{{user `kscfg`}} <enter><wait>"
+]
+

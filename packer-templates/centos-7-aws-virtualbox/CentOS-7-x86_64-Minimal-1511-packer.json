@@ -1,0 +1,70 @@
+{
+    "variables": {
+      "ssh_pass" : "<<CHANGEME>>",
+      "aws_key" : "<<CHANGEME>>",
+      "aws_secret" : "<<CHANGEME>>",
+      "aws_ami_description" : "bauer-centos-7",
+      "aws_ami_buildversion" : "1.0",
+      "ssh_name" : "root",
+      "iso_url" : "http://mirror.sov.uk.goscomb.net/centos/7/isos/x86_64/CentOS-7-x86_64-Minimal-1511.iso",
+      "iso_checksum_url" : "http://mirror.centos.org/centos/7/isos/x86_64/sha256sum.txt",
+      "iso_checksum_type" : "sha256",
+      "aws_region" : "eu-west-1",
+      "aws_bucket" : "bcs-vmimport",
+      "hostname" : "packer-{{ user `aws_ami_buildversion` }}",
+      "kscfg": "ks.cfg",
+      "disk_size": "10000",
+      "vrdpport": "5999",
+      "httpport": "10090"
+    },
+    "builders": [{
+        "headless": "true",
+        "type": "virtualbox-iso",
+        "guest_os_type": "RedHat_64",
+        "format": "ova",
+        "vboxmanage": [
+            ["modifyvm", "{{ .Name }}", "--vram", "32"],
+            ["modifyvm", "{{ .Name }}", "--cpus", "2"],
+            ["modifyvm", "{{ .Name }}", "--memory", "2048"]
+        ],
+        "ssh_wait_timeout": "60m",
+        "guest_additions_mode" : "disable",
+        "disk_size" : "{{ user `disk_size` }}",
+        "http_directory": "http",
+        "http_port_min": "{{ user `httpport` }}",
+        "http_port_max": "{{ user `httpport` }}",
+        "iso_url": "{{ user `iso_url` }}",
+        "iso_checksum_url": "{{ user `iso_checksum_url` }}",
+        "iso_checksum_type": "{{ user `iso_checksum_type` }}",
+        "ssh_username": "{{ user `ssh_name` }}",
+        "ssh_password": "{{ user `ssh_pass` }}",
+        "vrdp_port_min": "{{ user `vrdpport` }}",
+        "vrdp_port_max": "{{ user `vrdpport` }}",
+        "shutdown_command": "echo {{ user `ssh_pass` }} | sudo -S shutdown -P now",
+        "boot_command" : [
+            "<tab><spacebar> text net.ifnames=0 biosdevname=0 ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/{{ user `kscfg` }} <enter><wait>"
+        ]
+    }],
+    "provisioners": [{
+      "type": "shell",
+      "inline": [
+        "yum clean all",
+        "yum -y install epel-release",
+        "yum -y upgrade",
+        "yum -y install cloud-init cloud-utils cloud-utils-growpart htop openssh-server",
+        "yum clean all",
+        "sed -ri 's/requiretty/\\!requiretty/' /etc/sudoers"
+      ]
+    }],
+    "post-processors": [ {
+      "type": "amazon-import",
+      "access_key": "{{ user `aws_key` }}",
+      "secret_key": "{{ user `aws_secret` }}",
+      "region": "{{ user `aws_region` }}",
+      "s3_bucket_name": "{{ user `aws_bucket` }}",
+      "tags": {
+        "Name": "{{ user `aws_ami_description` }}-{{ timestamp }}",
+        "Version" : "{{ user `aws_ami_buildversion` }}"
+      }
+    }]
+}

@@ -1,0 +1,8 @@
+[{
+    "Description": "First CLI task",
+    "Format": "ova",
+    "UserBucket": {
+        "S3Bucket": "bcs-vmimport",
+        "S3Key": "packer-import-1464268770.ova"
+    }
+}]
