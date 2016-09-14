@@ -18,7 +18,7 @@ cd packer-templates/centos-7-aws-virtualbox
 packer build -force CentOS-7-x86_64-Minimal-1511-packer.json
 
 # With logging
-PACKER_LOG="yes" packer-hashicorp build -force CentOS-7-x86_64-Minimal-1511.json
+PACKER_LOG="yes" packer build -force CentOS-7-x86_64-Minimal-1511.json
 ```
 
 ## To install Virtualbox in VMWare infrastructure - WORKS
